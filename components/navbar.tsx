@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { Menu, Search, ShoppingBag, User } from "lucide-react"
 
@@ -24,7 +25,7 @@ export type NavbarProps = {
 const defaultLinks: NavbarLink[] = [
   { label: "Men", href: "#" },
   { label: "Women", href: "#" },
-  { label: "BLVCK Home", href: "#" },
+  { label: "MORAL Home", href: "#" },
   { label: "Digital", href: "#" },
   { label: "Collab", href: "#" },
   { label: "Outlet", href: "#" },
@@ -90,12 +91,12 @@ export function Navbar({
   const [menuOpen, setMenuOpen] = React.useState(false)
 
   return (
-    <header
-      data-slot="navbar"
-      className={cn("w-full bg-black text-white", className)}
-    >
+    <>
       <AnnouncementBar />
-      <div className="w-full">
+      <header
+        data-slot="navbar"
+        className={cn("sticky top-0 z-50 w-full bg-black text-white", className)}
+      >
         <div className="grid h-20 grid-cols-[1fr_auto_1fr] items-center border-b border-white/10 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-1 sm:gap-1.5">
             <NavbarIconButton
@@ -112,15 +113,17 @@ export function Navbar({
 
           <Link
             href={brandHref}
-            aria-label="BLVCK Paris home"
-            className="flex flex-col items-center justify-center text-white"
+            aria-label="MORAL home"
+            className="flex items-center justify-center text-white"
           >
-            <span className="text-[1.05rem] font-semibold leading-none tracking-[0.42em] sm:text-[1.15rem]">
-              BLVCK
-            </span>
-            <span className="mt-2 text-[0.56rem] font-medium leading-none tracking-[0.52em] text-white/70">
-              PARIS
-            </span>
+            <Image
+              src="/logo.png"
+              alt="MORAL logo"
+              width={1199}
+              height={478}
+              priority
+              className="h-8 w-auto sm:h-9 lg:h-15"
+            />
           </Link>
 
           <div className="flex items-center justify-end gap-1 sm:gap-1.5">
@@ -143,7 +146,7 @@ export function Navbar({
             ))}
           </ul>
         </nav>
-      </div>
+      </header>
 
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent
@@ -152,12 +155,13 @@ export function Navbar({
         >
           <div className="flex h-full flex-col px-6 py-8">
             <div className="pb-10">
-              <div className="text-[0.95rem] font-semibold leading-none tracking-[0.42em]">
-                BLVCK
-              </div>
-              <div className="mt-2 text-[0.56rem] font-medium leading-none tracking-[0.5em] text-white/55">
-                PARIS
-              </div>
+              <Image
+                src="/logo.png"
+                alt="MORAL logo"
+                width={1199}
+                height={478}
+                className="h-8 w-auto"
+              />
             </div>
 
             <nav aria-label="Mobile primary" className="flex flex-col gap-5">
@@ -179,6 +183,6 @@ export function Navbar({
           </div>
         </SheetContent>
       </Sheet>
-    </header>
+    </>
   )
 }
