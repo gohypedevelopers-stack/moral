@@ -4,6 +4,8 @@ import * as React from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
+import { cn } from "@/lib/utils"
+
 type Product = {
   name: string
   price: string
@@ -104,30 +106,54 @@ const productPages = chunkProducts(products, PAGE_SIZE)
 function ProductCard({
   product,
   priority = false,
+  className,
 }: {
   product: Product
   priority?: boolean
+  className?: string
 }) {
   return (
-    <article className="flex h-full flex-col">
+    <article className={cn("flex h-full flex-col", className)}>
       <div className="relative aspect-square overflow-hidden bg-[#bdbdbd] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]">
         <Image
           src={product.imageSrc}
           alt={product.imageAlt}
           fill
-          sizes="(max-width: 768px) 50vw, (max-width: 1280px) 25vw, 25vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className={product.imageClassName ?? "object-contain object-center"}
           priority={priority}
         />
       </div>
 
-      <div className="pt-3">
-        <h3 className="text-[1rem] font-semibold leading-6 tracking-[-0.02em] text-black">
+      <div className="pt-2.5 sm:pt-3">
+        <h3 className="text-[0.95rem] font-semibold leading-6 tracking-[-0.02em] text-black sm:text-[1rem]">
           {product.name}
         </h3>
-        <p className="mt-1 text-[0.92rem] text-black/72">{product.price}</p>
+        <p className="mt-1 text-[0.84rem] text-black/72 sm:text-[0.92rem]">
+          {product.price}
+        </p>
       </div>
     </article>
+  )
+}
+
+function MobileProductCarousel() {
+  return (
+    <div
+      aria-label="Just dropped products"
+      className="overflow-x-auto pb-2 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      <div className="flex gap-3">
+        {products.map((product, index) => (
+          <div
+            key={product.name}
+            className="min-w-full shrink-0 snap-start"
+          >
+            <ProductCard product={product} priority={index < 2} />
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -148,12 +174,16 @@ export function JustDroppedSection() {
 
   return (
     <section className="relative bg-white text-black">
-      <div className="mx-auto max-w-[1720px] px-4 py-16 sm:px-6 sm:py-20 lg:px-10 lg:py-24">
-        <h2 className="text-center text-[clamp(1.9rem,2.8vw,2.8rem)] font-semibold tracking-[-0.04em]">
+      <div className="mx-auto max-w-[1720px] px-4 py-12 sm:px-6 sm:py-20 lg:px-10 lg:py-24">
+        <h2 className="text-center text-[clamp(1.7rem,6vw,2.8rem)] font-semibold tracking-[-0.04em] sm:text-[clamp(1.9rem,2.8vw,2.8rem)]">
           Just Dropped
         </h2>
 
-        <div className="relative mt-10 lg:mt-12">
+        <div className="mt-6 lg:hidden">
+          <MobileProductCarousel />
+        </div>
+
+        <div className="relative mt-6 hidden lg:block lg:mt-12">
           <button
             type="button"
             aria-label="Previous products"
@@ -166,14 +196,17 @@ export function JustDroppedSection() {
 
           <div className="overflow-hidden">
             <div
-              className="flex transform-gpu transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform"
+              className="flex gap-3 lg:gap-0 lg:translate-x-[var(--carousel-offset)] lg:transform-gpu lg:transition-transform lg:duration-500 lg:ease-[cubic-bezier(0.22,1,0.36,1)] lg:will-change-transform"
               style={{
-                transform: `translate3d(-${activePage * 100}%, 0, 0)`,
+                ["--carousel-offset" as string]: `-${activePage * 100}%`,
               }}
             >
               {productPages.map((page, pageIndex) => (
-                <div key={page[0].name} className="min-w-full shrink-0">
-                  <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <div
+                  key={page[0].name}
+                  className="min-w-full shrink-0 snap-start"
+                >
+                  <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-3">
                     {page.map((product, itemIndex) => (
                       <ProductCard
                         key={product.name}
@@ -198,10 +231,10 @@ export function JustDroppedSection() {
           </button>
         </div>
 
-        <div className="mt-14 flex justify-center">
+        <div className="mt-10 flex justify-center sm:mt-14">
           <button
             type="button"
-            className="inline-flex items-center border-b border-black/80 pb-2 text-sm font-medium tracking-[0.08em] transition hover:border-black"
+            className="inline-flex items-center border-b border-black/80 pb-2 text-[0.8rem] font-medium tracking-[0.08em] transition hover:border-black sm:text-sm"
           >
             Shop All
           </button>

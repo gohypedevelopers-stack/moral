@@ -34,7 +34,7 @@ const defaultLinks: NavbarLink[] = [
 
 function AnnouncementBar() {
   return (
-    <div className="flex h-9 items-center justify-center border-b border-black/10 bg-[#b8b8b8] px-4 text-center text-[0.72rem] font-medium leading-none tracking-[0.08em] text-black sm:h-10 sm:text-[0.8rem]">
+    <div className="flex h-8 items-center justify-center border-b border-black/10 bg-[#b8b8b8] px-3 text-center text-[0.68rem] font-medium leading-none tracking-[0.08em] text-black sm:h-10 sm:px-4 sm:text-[0.8rem]">
       <p className="truncate">20% OFF with code MEMORIAL20</p>
     </div>
   )
@@ -57,7 +57,7 @@ function NavbarIconButton({
       title={label}
       onClick={onClick}
       className={cn(
-        "inline-flex h-9 w-9 items-center justify-center text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
+        "inline-flex size-10 shrink-0 items-center justify-center text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 sm:size-9",
         className
       )}
     >
@@ -97,17 +97,17 @@ export function Navbar({
         data-slot="navbar"
         className={cn("sticky top-0 z-50 w-full bg-black text-white", className)}
       >
-        <div className="grid h-20 grid-cols-[1fr_auto_1fr] items-center border-b border-white/10 px-4 sm:px-6 lg:px-8">
+        <div className="grid h-16 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-white/10 px-3 sm:h-20 sm:px-6 lg:px-8">
           <div className="flex items-center gap-1 sm:gap-1.5">
             <NavbarIconButton
               label="Open menu"
               onClick={() => setMenuOpen(true)}
               className="-ml-1"
             >
-              <Menu className="size-5" strokeWidth={1.7} />
+              <Menu className="size-4 sm:size-5" strokeWidth={1.7} />
             </NavbarIconButton>
             <NavbarIconButton label="Search" onClick={onSearchClick}>
-              <Search className="size-5" strokeWidth={1.7} />
+              <Search className="size-4 sm:size-5" strokeWidth={1.7} />
             </NavbarIconButton>
           </div>
 
@@ -122,16 +122,16 @@ export function Navbar({
               width={1199}
               height={478}
               priority
-              className="h-8 w-auto sm:h-9 lg:h-15"
+              className="h-7 w-auto sm:h-8 lg:h-15"
             />
           </Link>
 
           <div className="flex items-center justify-end gap-1 sm:gap-1.5">
             <NavbarIconButton label="Account" onClick={onAccountClick}>
-              <User className="size-5" strokeWidth={1.7} />
+              <User className="size-4 sm:size-5" strokeWidth={1.7} />
             </NavbarIconButton>
             <NavbarIconButton label="Shopping bag" onClick={onCartClick}>
-              <ShoppingBag className="size-5" strokeWidth={1.7} />
+              <ShoppingBag className="size-4 sm:size-5" strokeWidth={1.7} />
             </NavbarIconButton>
           </div>
         </div>
@@ -151,16 +151,16 @@ export function Navbar({
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent
           side="left"
-          className="w-[min(22rem,86vw)] border-white/10 bg-black text-white"
+          className="w-[min(20rem,86vw)] border-white/10 bg-black text-white"
         >
-          <div className="flex h-full flex-col px-6 py-8">
-            <div className="pb-10">
+          <div className="flex h-full flex-col px-5 py-8 sm:px-6">
+            <div className="pb-8 sm:pb-10">
               <Image
                 src="/logo.png"
                 alt="MORAL logo"
                 width={1199}
                 height={478}
-                className="h-8 w-auto"
+                className="h-7 w-auto sm:h-8"
               />
             </div>
 
@@ -169,7 +169,7 @@ export function Navbar({
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="text-[0.9rem] font-semibold uppercase tracking-[0.2em] text-white/90 transition-colors hover:text-white"
+                  className="text-[0.88rem] font-semibold uppercase tracking-[0.2em] text-white/90 transition-colors hover:text-white"
                   onClick={() => setMenuOpen(false)}
                 >
                   {link.label}

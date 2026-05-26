@@ -61,17 +61,17 @@ function CollectionCard({ item }: { item: CollectionItem }) {
           src={item.imageSrc}
           alt={item.imageAlt}
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
           className={item.imageClassName ?? "object-contain object-center"}
         />
       </div>
 
-      <div className="flex flex-col items-center pt-6 text-center">
-        <h3 className="text-[1.03rem] font-medium tracking-[-0.02em] text-black">
+      <div className="flex flex-col items-center pt-4 text-center sm:pt-6">
+        <h3 className="text-[0.84rem] font-medium leading-tight tracking-[-0.02em] text-black sm:text-[1.03rem]">
           {item.title}
         </h3>
         <span
-          className={`mt-3 block h-px bg-black/80 ${item.underlineClassName ?? "w-12"}`}
+          className={`mt-2 block h-px bg-black/80 sm:mt-3 ${item.underlineClassName ?? "w-12"}`}
         />
       </div>
     </article>
@@ -86,7 +86,7 @@ export function CollectionsGrid() {
           Explore the Maison&apos;s Collections
         </h2>
 
-        <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
           {collections.map((item) => (
             <CollectionCard key={item.title} item={item} />
           ))}
