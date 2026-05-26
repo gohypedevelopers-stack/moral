@@ -5,8 +5,6 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { PRELOADER_EXIT_MS, PRELOADER_STORAGE_KEY } from "@/lib/preloader"
 
-const VIDEO_START_TIME = 0.9
-
 export type PreloaderProps = {
   className?: string
   message?: string
@@ -26,7 +24,6 @@ export function Preloader({
   const exitStartedRef = React.useRef(false)
   const rootRef = React.useRef<HTMLDivElement | null>(null)
   const videoRef = React.useRef<HTMLVideoElement | null>(null)
-  const hasPrimedVideoRef = React.useRef(false)
   const touchStartYRef = React.useRef<number | null>(null)
   const exitTimeoutRef = React.useRef<number | null>(null)
 
@@ -45,46 +42,28 @@ export function Preloader({
     return () => window.cancelAnimationFrame(frame)
   }, [storageKey])
 
-  const getStartTime = React.useCallback((video: HTMLVideoElement) => {
-    if (!Number.isFinite(video.duration) || video.duration <= 0) {
-      return VIDEO_START_TIME
-    }
+  // Keep the autoplay logic simple so browsers can start the clip on their own.
+  React.useEffect(() => {
+    if (!mounted || isHidden) return
 
-    return Math.min(VIDEO_START_TIME, Math.max(0, video.duration - 0.1))
-  }, [])
-
-  // Skip the dark lead-in frames and start on the first visible frame.
-  const primeVideo = React.useCallback(() => {
     const video = videoRef.current
     if (!video) return
 
     video.muted = true
 
-    const targetTime = getStartTime(video)
-
-    if (!hasPrimedVideoRef.current) {
-      if (!Number.isFinite(video.duration) || video.duration <= targetTime) return
-
-      hasPrimedVideoRef.current = true
-      video.currentTime = targetTime
-      return
+    const tryPlay = () => {
+      void video.play().catch(() => {
+        // Muted autoplay should work in modern browsers.
+      })
     }
 
-    if (Math.abs(video.currentTime - targetTime) > 0.05) {
-      video.currentTime = targetTime
-      return
+    if (video.readyState >= 2) {
+      tryPlay()
+    } else {
+      video.addEventListener("canplay", tryPlay, { once: true })
+      return () => video.removeEventListener("canplay", tryPlay)
     }
-
-    void video.play().catch(() => {
-      // Muted autoplay should work in modern browsers; if not, we keep the overlay.
-    })
-  }, [getStartTime])
-
-  React.useEffect(() => {
-    if (!mounted || isHidden) return
-
-    primeVideo()
-  }, [mounted, isHidden, primeVideo])
+  }, [mounted, isHidden])
 
   React.useEffect(() => {
     if (!mounted || isHidden) return
@@ -240,18 +219,11 @@ export function Preloader({
           ref={videoRef}
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover object-[center_36%] brightness-90 contrast-105 saturate-90"
+          autoPlay
+          loop
           muted
           playsInline
           preload="auto"
-          onLoadedMetadata={primeVideo}
-          onSeeked={primeVideo}
-          onCanPlay={primeVideo}
-          onEnded={() => {
-            const video = videoRef.current
-            if (!video) return
-
-            video.currentTime = getStartTime(video)
-          }}
         >
           <source src={videoSrc} type="video/mp4" />
         </video>
