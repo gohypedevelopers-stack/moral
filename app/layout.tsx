@@ -43,7 +43,6 @@ export default async function RootLayout({
             href="/Moral.mp4"
             as="video"
             type="video/mp4"
-            // @ts-expect-error — fetchPriority is valid HTML but not yet in React types
             fetchPriority="high"
           />
         )}
