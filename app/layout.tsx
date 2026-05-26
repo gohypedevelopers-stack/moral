@@ -36,17 +36,6 @@ export default async function RootLayout({
       lang="en"
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
     >
-      <head>
-        {!preloaderSeen && (
-          <link
-            rel="preload"
-            href="/Moral.mp4"
-            as="video"
-            type="video/mp4"
-            fetchPriority="high"
-          />
-        )}
-      </head>
       <body className="min-h-full flex flex-col">
         {!preloaderSeen ? <Preloader /> : null}
         {children}
