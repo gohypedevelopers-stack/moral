@@ -21,8 +21,10 @@ export function Preloader({
   const [mounted, setMounted] = React.useState(false)
   const [isLeaving, setIsLeaving] = React.useState(false)
   const [isHidden, setIsHidden] = React.useState(false)
+  const [videoPlaying, setVideoPlaying] = React.useState(false)
   const exitStartedRef = React.useRef(false)
   const rootRef = React.useRef<HTMLDivElement | null>(null)
+  const videoRef = React.useRef<HTMLVideoElement | null>(null)
   const touchStartYRef = React.useRef<number | null>(null)
   const exitTimeoutRef = React.useRef<number | null>(null)
 
@@ -40,6 +42,50 @@ export function Preloader({
 
     return () => window.cancelAnimationFrame(frame)
   }, [storageKey])
+
+  // Programmatically play the video to handle autoplay restrictions
+  React.useEffect(() => {
+    if (!mounted || isHidden) return
+
+    const video = videoRef.current
+    if (!video) return
+
+    const attemptPlay = () => {
+      // Ensure muted (required for autoplay in most browsers)
+      video.muted = true
+      const playPromise = video.play()
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // If play fails, try again with a user-interaction-independent approach
+          video.muted = true
+          video.play().catch(() => {
+            // Silently fail — video just won't play
+          })
+        })
+      }
+    }
+
+    // If the video has enough data, play immediately
+    if (video.readyState >= 2) {
+      attemptPlay()
+    } else {
+      // Wait for enough data to be buffered
+      const handleCanPlay = () => {
+        attemptPlay()
+      }
+      video.addEventListener("canplay", handleCanPlay, { once: true })
+      // Also try to load the video explicitly
+      video.load()
+      return () => {
+        video.removeEventListener("canplay", handleCanPlay)
+      }
+    }
+  }, [mounted, isHidden])
+
+  // Track when the video actually starts playing
+  const handleVideoPlaying = React.useCallback(() => {
+    setVideoPlaying(true)
+  }, [])
 
   React.useEffect(() => {
     if (!mounted || isHidden) return
@@ -192,14 +238,19 @@ export function Preloader({
     >
       <div className="absolute inset-0">
         <video
+          ref={videoRef}
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover object-[center_36%] brightness-90 contrast-105 saturate-90"
+          className={cn(
+            "absolute inset-0 h-full w-full object-cover object-[center_36%] brightness-90 contrast-105 saturate-90 transition-opacity duration-500",
+            videoPlaying ? "opacity-100" : "opacity-0"
+          )}
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
-          poster="/products/image29.webp"
+          onPlaying={handleVideoPlaying}
+          onTimeUpdate={!videoPlaying ? handleVideoPlaying : undefined}
         >
           <source src={videoSrc} type="video/mp4" />
         </video>
@@ -219,3 +270,4 @@ export function Preloader({
     </div>
   )
 }
+
