@@ -213,6 +213,16 @@
   }
 }
 
-html[data-preloader-seen="true"] [data-preloader-overlay] {
-  display: none !important;
+@keyframes preloader-slide-up {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, -100%, 0);
+  }
+}
+
+[data-preloader-overlay][data-state="leaving"] {
+  animation: preloader-slide-up 500ms ease-in-out forwards;
 }

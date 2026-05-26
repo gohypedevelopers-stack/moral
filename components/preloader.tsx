@@ -3,7 +3,7 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-import { PRELOADER_STORAGE_KEY } from "@/lib/preloader"
+import { PRELOADER_EXIT_MS, PRELOADER_STORAGE_KEY } from "@/lib/preloader"
 
 export type PreloaderProps = {
   className?: string
@@ -21,25 +21,19 @@ export function Preloader({
   const [mounted, setMounted] = React.useState(false)
   const [isLeaving, setIsLeaving] = React.useState(false)
   const [isHidden, setIsHidden] = React.useState(false)
-  const seenRef = React.useRef(false)
   const exitStartedRef = React.useRef(false)
   const rootRef = React.useRef<HTMLDivElement | null>(null)
   const touchStartYRef = React.useRef<number | null>(null)
+  const exitTimeoutRef = React.useRef<number | null>(null)
 
   React.useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       try {
         const alreadySeen = window.localStorage.getItem(storageKey) === "true"
-        seenRef.current = alreadySeen
         if (alreadySeen) {
           setIsHidden(true)
-          document.documentElement.dataset.preloaderSeen = "true"
-        } else {
-          document.documentElement.dataset.preloaderSeen = "false"
         }
-      } catch {
-        seenRef.current = false
-      }
+      } catch {}
 
       setMounted(true)
     })
@@ -65,23 +59,34 @@ export function Preloader({
   }, [mounted, isHidden])
 
   React.useEffect(() => {
+    return () => {
+      if (exitTimeoutRef.current !== null) {
+        window.clearTimeout(exitTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  React.useEffect(() => {
     if (!mounted || isHidden) return
     rootRef.current?.focus()
   }, [mounted, isHidden])
 
   const finishExit = React.useCallback(() => {
+    if (exitTimeoutRef.current !== null) {
+      window.clearTimeout(exitTimeoutRef.current)
+      exitTimeoutRef.current = null
+    }
+
     setIsHidden(true)
   }, [])
 
   const dismiss = React.useCallback(() => {
     if (isHidden || isLeaving || exitStartedRef.current) return
 
-    seenRef.current = true
     exitStartedRef.current = true
 
     try {
       window.localStorage.setItem(storageKey, "true")
-      document.documentElement.dataset.preloaderSeen = "true"
       document.cookie = `${storageKey}=true; path=/; max-age=31536000; samesite=lax`
     } catch {
       // Ignore storage failures and continue hiding the preloader.
@@ -89,8 +94,11 @@ export function Preloader({
 
     window.requestAnimationFrame(() => {
       setIsLeaving(true)
+      exitTimeoutRef.current = window.setTimeout(() => {
+        finishExit()
+      }, PRELOADER_EXIT_MS)
     })
-  }, [isHidden, isLeaving, storageKey])
+  }, [finishExit, isHidden, isLeaving, storageKey])
 
   const handleWheel = React.useCallback(
     (event: React.WheelEvent<HTMLDivElement>) => {
@@ -144,8 +152,8 @@ export function Preloader({
     [dismiss]
   )
 
-  const handleTransitionEnd = React.useCallback(
-    (event: React.TransitionEvent<HTMLDivElement>) => {
+  const handleAnimationEnd = React.useCallback(
+    (event: React.AnimationEvent<HTMLDivElement>) => {
       if (event.target !== event.currentTarget) return
 
       if (isLeaving) {
@@ -163,6 +171,7 @@ export function Preloader({
     <div
       ref={rootRef}
       data-preloader-overlay
+      data-state={isLeaving ? "leaving" : "idle"}
       role="button"
       tabIndex={0}
       aria-label="Click or scroll to enter the site"
@@ -173,13 +182,13 @@ export function Preloader({
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
       onKeyDown={handleKeyDown}
-      onTransitionEnd={handleTransitionEnd}
+      onAnimationEnd={handleAnimationEnd}
       className={cn(
-        "fixed inset-0 z-[100] overflow-hidden bg-black text-white outline-none motion-safe:transition-[transform,opacity] motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-        isLeaving ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100",
+        "fixed inset-0 z-[100] overflow-hidden bg-black text-white outline-none transform-gpu",
+        "translate-y-0 opacity-100",
         className
       )}
-      style={{ willChange: "transform, opacity" }}
+      style={{ willChange: "transform" }}
     >
       <div className="absolute inset-0">
         <video
