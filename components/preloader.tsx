@@ -218,7 +218,7 @@ export function Preloader({
         <video
           ref={videoRef}
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover object-[center_36%] brightness-90 contrast-105 saturate-90"
+          className="absolute inset-0 h-full w-full object-contain sm:object-cover object-center sm:object-[center_36%] brightness-90 contrast-105 saturate-90"
           autoPlay
           loop
           muted
